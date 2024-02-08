@@ -40,7 +40,6 @@ export function evaluateExpression(
       aliases = getVariableAliases(definesVariable);
     }
     changedLatex = getVariableName(changedLatex.replace("}", "}"));
-    console.log({aliases,changedLatex,variables})
     for (const id in variables) {
       const variable: MathVariable = variables[id];
       variableObj[id] = variable.value;
@@ -48,9 +47,7 @@ export function evaluateExpression(
         // Replace all occurences of alias with
         const regexSafeAlias = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         const r = new RegExp("(^|(?<=[^a-zA-Z]))" + regexSafeAlias + "($|(?=[^a-zA-Z]))", "g");
-        console.log("changedLatex before",changedLatex)
         changedLatex = changedLatex.replace(r, id);
-        console.log("changedLatex after",changedLatex)
         for (const a of aliases) {
           if (alias === a) {
             definedVariableID = id;
@@ -60,7 +57,7 @@ export function evaluateExpression(
     }
     const res = evaluatex(changedLatex, {}, { latex: true });
     const usedVars: Set<string> = new Set(res.tokens.filter((t) => t.type === "SYMBOL").map((t) => t.value as string));
-    console.log({usedVars,res});
+
     const resNum = res(variableObj);
 
     if (definesVariable !== undefined) {

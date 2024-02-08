@@ -1,4 +1,5 @@
 import { Content, InputRule, mergeAttributes, Node, PasteRule } from "@tiptap/core";
+// @ts-ignore
 import katex from "katex";
 import {
   AllVariableUpdateListeners,
@@ -7,6 +8,7 @@ import {
 } from "./latex-evaluation/evaluate-expression";
 import { generateID } from "./util/generate-id";
 import { updateEvaluation } from "./latex-evaluation/update-evaluation";
+
 
 export const InlineMathNode = Node.create({
   name: "inlineMath",
@@ -23,15 +25,6 @@ export const InlineMathNode = Node.create({
         renderHTML: (attributes) => {
           return {
             "data-latex": attributes.latex,
-          };
-        },
-      },
-      evaluate: {
-        default: "no",
-        parseHTML: (element) => element.getAttribute("data-evaluate"),
-        renderHTML: (attributes) => {
-          return {
-            "data-evaluate": attributes.evaluate,
           };
         },
       },
@@ -239,7 +232,7 @@ export const InlineMathNode = Node.create({
       resultSpan.classList.add("katex");
       let showEvalResult = node.attrs.evaluate === "yes";
       const id = generateID();
-      const evalRes = updateEvaluation(latex, id, resultSpan, showEvalResult, this.editor.storage.inlineMath);
+      // const evalRes = updateEvaluation(latex, id, resultSpan, showEvalResult, this.editor.storage.inlineMath);
 
       // On click, update the evaluate attribute (effectively triggering whether the result is shown)
       outerSpan.addEventListener("click", (ev) => {
@@ -261,16 +254,6 @@ export const InlineMathNode = Node.create({
       return {
         dom: outerSpan,
         destroy: () => {
-          if (evalRes?.variablesUsed) {
-            // De-register listeners
-            for (const v of evalRes.variablesUsed) {
-              let listenersForV: VariableUpdateListeners = this.editor.storage.inlineMath.variableListeners[v];
-              if (listenersForV == undefined) {
-                listenersForV = [];
-              }
-              this.editor.storage.inlineMath.variableListeners[v] = listenersForV.filter((l) => l.id !== id);
-            }
-          }
           // Not sure yet, if we want this behavior:
           // This would delete the defined variable (if exists) when the math node is destroyed
           // additionally, the update function can be called (i do not like the UX so far)
